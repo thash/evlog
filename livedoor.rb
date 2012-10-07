@@ -3,14 +3,16 @@ require "rubygems"
 require "bundler/setup"
 Bundler.require
 
+$secret  = Hashie::Mash.new(YAML.load_file('./secret.yml'))
+
 a = Mechanize.new {|agent|
   agent.user_agent = 'Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0; FujitsuToshibaMobileCommun; IS12T; KDDI)'
 }
 
 a.get("https://member.livedoor.com/login/") {|page|
   form = page.form_with(name: "loginForm")
-  form.livedoor_id = "mastertest"
-  form.password = "jlMcbgtacIPs"
+  form.livedoor_id = $secret.livedoor_id
+  form.password = $secret.livedoor_pw
   page2 = form.submit
   cms_page =  page2.link_with(href: /r\/user_blogcms/).click
   edit_page = cms_page.link_with(href: /\/blog\/mastertest\/article\/edit/).click
