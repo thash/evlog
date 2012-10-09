@@ -6,3 +6,4 @@ source :rubygems
 gem 'pry'
 gem 'mechanize'
 gem 'hashie'
+gem 'leveldb-ruby', require: 'leveldb'
