@@ -64,5 +64,29 @@ f.notebookGuid = blognotebook.guid
 
 notes = noteStore.findNotes(authToken, f, 0, 10).notes
 
+fullnotes = notes.map{|note|
+  noteStore.getNote(authToken, note.guid, true, true, false, false)
+}
+
+db = LevelDB::DB.new("/tmp/leveldb")
+
+fullnotes.each do |note|
+
+  # contentHashの生成にtitleは含まれているか?
+  hash = db.get "evlog/#{note.guid}/contentHash"
+  next if hash == note.contentHash
+
+  db.put "evlog/#{note.guid}/contentHash", note.contentHash
+  db.put "evlog/#{note.guid}/title", note.title
+  db.put "evlog/#{note.guid}/content/enml", note.content
+
+end
+
+
+# ほんとは分ける.
+content = db.get "evlog/#{fullnotes.first.guid}/content/enml"
+doc = Nokogiri::XML(content)
+
 binding.pry
+
 
