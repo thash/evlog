@@ -68,6 +68,17 @@ fullnotes = notes.map{|note|
   noteStore.getNote(authToken, note.guid, true, true, false, false)
 }
 
+
+# ENMLまでは"あるものを入れる"ということで永続的で良い. その後の変換は改良の余地が多分にある.
+# とりあえずいちばんうざいbrを改行にしただけのtextを.
+# プラスしてEverNoteのデコをenmlからmarkdown(or directlly HTML)に変えられるとよい. 必要ないっちゃないけど.
+def enml2markdown(enml)
+  doc = Nokogiri::XML(content)
+  body_div = (doc/"en-note"/"div").first
+  body_div.children.map{|e| e.name == "br" ? "\n" : e.text }.join
+end
+
+
 db = LevelDB::DB.new("/tmp/leveldb")
 
 fullnotes.each do |note|
@@ -79,14 +90,9 @@ fullnotes.each do |note|
   db.put "evlog/#{note.guid}/contentHash", note.contentHash
   db.put "evlog/#{note.guid}/title", note.title
   db.put "evlog/#{note.guid}/content/enml", note.content
+  # ほんとは分ける. <- 何をだ
+  db.put "evlog/#{note.guid}/content/markdown", enml2markdown(note.content)
 
 end
-
-
-# ほんとは分ける.
-content = db.get "evlog/#{fullnotes.first.guid}/content/enml"
-doc = Nokogiri::XML(content)
-
-binding.pry
 
 
