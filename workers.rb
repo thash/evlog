@@ -21,12 +21,11 @@ class FetchNoteWorker
     }
 
     fullnotes.each do |note|
-
       # contentHashの生成にtitleは含まれているか?
       hash = $leveldb.get "evlog/#{note.guid}/contentHash"
-      next if hash == note.contentHash
+      next if hash == Digest::SHA1.hexdigest(note.contentHash)
 
-      $leveldb.put "evlog/#{note.guid}/contentHash", note.contentHash
+      $leveldb.put "evlog/#{note.guid}/contentHash", Digest::SHA1.hexdigest(note.contentHash)
       $leveldb.put "evlog/#{note.guid}/title", note.title
       $leveldb.put "evlog/#{note.guid}/content/enml", note.content
       $leveldb.put "evlog/#{note.guid}/content/markdown", enml2markdown(note.content)
@@ -64,7 +63,7 @@ class FetchNoteWorker
   # とりあえずいちばんうざいbrを改行にしただけのtextを.
   # プラスしてEverNoteのデコをenmlからmarkdown(or directlly HTML)に変えられるとよい. 必要ないっちゃないけど.
   def self.enml2markdown(enml)
-    doc = Nokogiri::XML(content)
+    doc = Nokogiri::XML(enml)
     body_div = (doc/"en-note"/"div").first
     body_div.children.map{|e| e.name == "br" ? "\n" : e.text }.join
   end
