@@ -28,6 +28,7 @@ GEM
     rack (1.4.1)
     rack-protection (1.2.0)
       rack
+    redcarpet (2.2.2)
     redis (3.0.2)
     redis-namespace (1.2.1)
       redis (~> 3.0.0)
@@ -57,4 +58,5 @@ DEPENDENCIES
   leveldb-ruby
   mechanize
   pry
+  redcarpet
   resque
