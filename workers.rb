@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 require "./evlog"
 
-class FetchNoteWorker
-  @queue = :fetch_note
+class FetchNotesWorker
+  @queue = :evlog_fetch_notes
 
   def self.perform(notebookname="Blog")
     setup_evernote
@@ -28,7 +28,8 @@ class FetchNoteWorker
       $leveldb.put "evlog/#{note.guid}/contentHash", Digest::SHA1.hexdigest(note.contentHash)
       $leveldb.put "evlog/#{note.guid}/title", note.title
       $leveldb.put "evlog/#{note.guid}/content/enml", note.content
-      $leveldb.put "evlog/#{note.guid}/content/markdown", enml2markdown(note.content)
+
+      Resque.enqueue(ConvertWorker, note.guid)
 
     end
   end
@@ -40,6 +41,7 @@ class FetchNoteWorker
       @authToken = $secret.auth_token
       evernoteHost = "sandbox.evernote.com"
       userStoreUrl = "https://#{evernoteHost}/edam/user"
+    when :production
     end
 
     userStoreTransport = Thrift::HTTPClientTransport.new(userStoreUrl)
@@ -59,6 +61,20 @@ class FetchNoteWorker
     @noteStore = Evernote::EDAM::NoteStore::NoteStore::Client.new(noteStoreProtocol)
   end
 
+end
+
+
+class ConvertWorker
+  @queue = :evlog_convert_note
+
+  # jobが入ってきたら上書きも辞さず更新
+  def self.perform(guid)
+    enml = $leveldb.get "evlog/#{guid}/content/enml"
+    return if enml == nil
+    # use return value to make HTML, if possible
+    $leveldb.put "evlog/#{guid}/content/markdown", enml2markdown(enml)
+  end
+
   # ENMLまでは"あるものを入れる"ということで永続的で良い. その後の変換は改良の余地が多分にある.
   # とりあえずいちばんうざいbrを改行にしただけのtextを.
   # プラスしてEverNoteのデコをenmlからmarkdown(or directlly HTML)に変えられるとよい. 必要ないっちゃないけど.
@@ -69,4 +85,5 @@ class FetchNoteWorker
   end
 
 end
+
 
