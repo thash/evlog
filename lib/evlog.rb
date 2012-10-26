@@ -4,7 +4,7 @@ require "rubygems"
 require "bundler/setup"
 Bundler.require
 
-$secret  = Hashie::Mash.new(YAML.load_file('./../secret.yml'))
+$secret  = Hashie::Mash.new(YAML.load_file(File.expand_path('../../secret.yml', __FILE__)))
 $leveldb = LevelDB::DB.new("/tmp/leveldb")
 
 ### Essense of EDAMTest.rb {{{
