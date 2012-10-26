@@ -4,15 +4,15 @@ require "rubygems"
 require "bundler/setup"
 Bundler.require
 
-$secret  = Hashie::Mash.new(YAML.load_file('./secret.yml'))
+$secret  = Hashie::Mash.new(YAML.load_file('./../secret.yml'))
 $leveldb = LevelDB::DB.new("/tmp/leveldb")
 
 ### Essense of EDAMTest.rb {{{
 require "digest/md5"
 dir = File.expand_path(File.dirname(__FILE__))
-$LOAD_PATH.push("#{dir}/evernote-sdk-ruby/lib")
-$LOAD_PATH.push("#{dir}/evernote-sdk-ruby/lib/thrift")
-$LOAD_PATH.push("#{dir}/evernote-sdk-ruby/lib/Evernote/EDAM")
+$LOAD_PATH.push("#{dir}/../evernote-sdk-ruby/lib")
+$LOAD_PATH.push("#{dir}/../evernote-sdk-ruby/lib/thrift")
+$LOAD_PATH.push("#{dir}/../evernote-sdk-ruby/lib/Evernote/EDAM")
 
 require "thrift/types"
 require "thrift/struct"
