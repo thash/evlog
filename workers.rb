@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-require "./evlog"
+require "./lib/evlog"
 
 class FetchNotesWorker
   @queue = :evlog_fetch_notes
@@ -27,6 +27,7 @@ class FetchNotesWorker
 
       $leveldb.put "evlog/#{note.guid}/contentHash", Digest::SHA1.hexdigest(note.contentHash)
       $leveldb.put "evlog/#{note.guid}/title", note.title
+      # ENMLまでは"あるものを入れる"ということで永続的で良い. その後の変換(convert)は改良の余地が多分にある.
       $leveldb.put "evlog/#{note.guid}/content/enml", note.content
 
       Resque.enqueue(ConvertWorker, note.guid)
@@ -38,7 +39,7 @@ class FetchNotesWorker
   def self.setup_evernote(mode=:sandbox)
     case mode
     when :sandbox
-      @authToken = $secret.auth_token
+      @authToken = $secret.sandbox_access_token
       evernoteHost = "sandbox.evernote.com"
       userStoreUrl = "https://#{evernoteHost}/edam/user"
     when :production
@@ -72,11 +73,12 @@ class ConvertWorker
     enml = $leveldb.get "evlog/#{guid}/content/enml"
     return if enml == nil
     # use return value to make HTML, if possible
-    $leveldb.put "evlog/#{guid}/content/markdown", enml2markdown(enml)
+    markdown = enml2markdown(enml) && html = markdown2html(markdown)
+    $leveldb.put "evlog/#{guid}/content/markdown", markdown if markdown
+    $leveldb.put "evlog/#{guid}/content/html", html if html
   end
 
-  # ENMLまでは"あるものを入れる"ということで永続的で良い. その後の変換は改良の余地が多分にある.
-  # とりあえずいちばんうざいbrを改行にしただけのtextを.
+  # とりあえずいちばんうざいbrを改行にしただけのtextをmarkdownとして返す.
   # プラスしてEverNoteのデコをenmlからmarkdown(or directlly HTML)に変えられるとよい. 必要ないっちゃないけど.
   def self.enml2markdown(enml)
     doc = Nokogiri::XML(enml)
@@ -84,6 +86,9 @@ class ConvertWorker
     body_div.children.map{|e| e.name == "br" ? "\n" : e.text }.join
   end
 
-end
+  def self.markdown2html(markdown)
+    return markdown #TODO
+  end
 
+end
 

@@ -14,3 +14,9 @@ secret.yml
     livedoor_pw: xxxxxxxx
 
 
+TODO
+================================
+
+* Catch OAuth callback with padrino
+* LevelDB multi-process (or another database)
+

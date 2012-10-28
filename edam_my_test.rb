@@ -48,7 +48,7 @@ require "Evernote/EDAM/limits_constants.rb"
 # https://sandbox.evernote.com/api/DeveloperToken.action
 
 # authToken = "your developer token"
-authToken = $secret.auth_token
+authToken = $secret.sandbox_access_token
 
 if (authToken == "your developer token")
   puts "Please fill in your developer token"
