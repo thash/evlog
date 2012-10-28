@@ -12,3 +12,4 @@ gem 'resque'
 gem 'redcarpet'
 
 gem 'oauth'
+gem 'padrino'
