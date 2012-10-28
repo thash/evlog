@@ -10,7 +10,15 @@ gem 'sinatra-flash', :require => 'sinatra/flash'
 
 # Component requirements
 gem 'haml'
-gem 'ripple'
+# gem 'ripple' {{{
+# Bundler could not find compatible versions for gem "activesupport":
+#   In Gemfile:
+#     ripple (>= 0) ruby depends on
+#       activesupport (= 3.0.0.beta) ruby
+#
+#     padrino (= 0.10.7) ruby depends on
+#       activesupport (3.2.0)
+#       }}}
 
 # Test requirements
 gem 'rspec', :group => "test"
