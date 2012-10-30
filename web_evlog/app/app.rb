@@ -13,15 +13,27 @@ class WebEvlog < Padrino::Application
 
 
   get '/request_token' do
-    @request_token = make_request_token
+    oauth_site   = 'https://sandbox.evernote.com'
+    consumer = OAuth::Consumer.new($secret.evernote.consumer_key, $secret.evernote.consumer_secret,
+                        { site: oauth_site,
+                          request_token_path: $secret.evernote.request_token_path,
+                          authorize_path:     $secret.evernote.authorize_path,
+                          access_token_path:  $secret.evernote.access_token_path })
+
+    callback_url = "http://127.0.0.1:3000/oauth/callback"
+    @request_token = consumer.get_request_token(:oauth_callback => callback_url)
+
+    robj = $riak.bucket("user").get_or_new("request_token")
+    robj.raw_data = Marshal.dump(@request_token)
+    robj.store
+
     render :haml, "= link_to 'autholize@EverNote', @request_token.authorize_url"
   end
 
   get '/oauth/callback' do
     oauth_verifier   = params["oauth_verifier"] # これが大事
-    request_token    = #TODO
-    # verifyしたrequest_tokenを使い回さないといけないが,
-    # Padrino(Sinatra)がリクエストごとにリロードするので(?)sessionが保持されない
+    request_token    = Marshal.load($riak.bucket("user").get("request_token").raw_data)
+
     access_token_obj = request_token.get_access_token(oauth_verifier: oauth_verifier)
     @access_token    = access_token_obj.token # save token
 
@@ -33,20 +45,6 @@ class WebEvlog < Padrino::Application
   end
 
 
-  def make_consumer
-    oauth_site   = 'https://sandbox.evernote.com'
-    OAuth::Consumer.new($secret.evernote.consumer_key, $secret.evernote.consumer_secret,
-                        { site: oauth_site,
-                          request_token_path: $secret.evernote.request_token_path,
-                          authorize_path:     $secret.evernote.authorize_path,
-                          access_token_path:  $secret.evernote.access_token_path })
-
-  end
-
-  def make_request_token
-    callback_url = "http://127.0.0.1:3000/oauth/callback"
-    make_consumer.get_request_token(:oauth_callback => callback_url)
-  end
 
 
   ##
