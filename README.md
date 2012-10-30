@@ -17,6 +17,6 @@ secret.yml
 TODO
 ================================
 
-* Catch OAuth callback with padrino
+* EverNote Authentication
 * LevelDB multi-process (or another database)
 

@@ -1,9 +1,53 @@
+require File.expand_path("../../../lib/evlog", __FILE__)
+
 class WebEvlog < Padrino::Application
   register Padrino::Rendering
   register Padrino::Mailer
   register Padrino::Helpers
 
   enable :sessions
+
+  get '/' do
+    render :haml, "= link_to 'login', '/request_token'"
+  end
+
+
+  get '/request_token' do
+    @request_token = make_request_token
+    render :haml, "= link_to 'autholize@EverNote', @request_token.authorize_url"
+  end
+
+  get '/oauth/callback' do
+    oauth_verifier   = params["oauth_verifier"] # これが大事
+    request_token    = #TODO
+    # verifyしたrequest_tokenを使い回さないといけないが,
+    # Padrino(Sinatra)がリクエストごとにリロードするので(?)sessionが保持されない
+    access_token_obj = request_token.get_access_token(oauth_verifier: oauth_verifier)
+    @access_token    = access_token_obj.token # save token
+
+    render :haml, <<-__EOL__
+= "oauth_verifier: #{oauth_verifier}"
+= "request_token: #{request_token}"
+= "access_token: #{@access_token}"
+    __EOL__
+  end
+
+
+  def make_consumer
+    oauth_site   = 'https://sandbox.evernote.com'
+    OAuth::Consumer.new($secret.evernote.consumer_key, $secret.evernote.consumer_secret,
+                        { site: oauth_site,
+                          request_token_path: $secret.evernote.request_token_path,
+                          authorize_path:     $secret.evernote.authorize_path,
+                          access_token_path:  $secret.evernote.access_token_path })
+
+  end
+
+  def make_request_token
+    callback_url = "http://127.0.0.1:3000/oauth/callback"
+    make_consumer.get_request_token(:oauth_callback => callback_url)
+  end
+
 
   ##
   # Caching support
