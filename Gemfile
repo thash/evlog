@@ -6,7 +6,8 @@ source :rubygems
 gem 'pry'
 gem 'mechanize'
 gem 'hashie'
-gem 'leveldb-ruby', require: 'leveldb'
+# gem 'leveldb-ruby', require: 'leveldb'
+gem 'ripple', github: 'basho/ripple'
 gem 'resque'
 
 gem 'redcarpet'
@@ -26,7 +27,6 @@ gem 'sinatra-flash', :require => 'sinatra/flash'
 
 # Component requirements
 gem 'haml'
-gem 'ripple', github: 'basho/ripple'
 
 # Test requirements
 gem 'rspec', :group => "test"
