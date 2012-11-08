@@ -6,8 +6,11 @@ source :rubygems
 gem 'pry'
 gem 'mechanize'
 gem 'hashie'
-# gem 'leveldb-ruby', require: 'leveldb'
+
 gem 'ripple', github: 'basho/ripple'
+# gem 'excon'     #=> faster http
+# gem 'yajl-ruby' #=> faster json
+
 gem 'resque'
 
 gem 'redcarpet'
