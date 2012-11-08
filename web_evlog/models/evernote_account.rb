@@ -2,9 +2,8 @@
 
 class EvernoteAccount
   include Ripple::Document
+  timestamps! # activate Ripple::Timestamps
 
-  # Standart properties
-  # property :name, String
   property :access_token, String
   property :active, Boolean, default: false
 

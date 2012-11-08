@@ -1,16 +1,17 @@
 # encoding: utf-8
-
 class User
   include Ripple::Document
+  timestamps! # activate Ripple::Timestamps
 
-  # Standart properties
-  # property :name, String
   property :name, String
+  property :email, String
+  property :password, String
 
-  # Relations
-  # many :addresses
-  # many :friends, :class_name => "Person"
-  # one :account
   one :evernote_account
+
+
+  def key
+    @key ||= "#{created_at.strftime("%Y%m%d%H%M%S")}/#{email.parameterize}"
+  end
 end
 
