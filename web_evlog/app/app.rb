@@ -1,3 +1,4 @@
+# encoding: utf-8
 require File.expand_path("../../../lib/evlog", __FILE__)
 
 class WebEvlog < Padrino::Application
@@ -8,9 +9,14 @@ class WebEvlog < Padrino::Application
   enable :sessions
 
   get '/' do
-    render :haml, "= link_to 'login', '/request_token'"
+    #binding.pry
+    render :haml, <<-__EOL__
+= flash[:notice] if flash[:notice] != nil
+= link_to 'login', '/users/login'
+= link_to 'signup', '/users/signup'
+= link_to 'oauth', '/request_token'
+    __EOL__
   end
-
 
   get '/request_token' do
     oauth_site   = 'https://sandbox.evernote.com'
