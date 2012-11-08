@@ -7,6 +7,9 @@ Bundler.require
 $secret  = Hashie::Mash.new(YAML.load_file(File.expand_path('../../secret.yml', __FILE__)))
 # $leveldb = LevelDB::DB.new("/tmp/leveldb")
 $riak = Riak::Client.new
+# => will be removed cuz I'll use Ripple instead
+
+require File.expand_path("../ripple_support", __FILE__)
 
 ### Essense of EDAMTest.rb {{{
 require "digest/md5"
