@@ -17,6 +17,7 @@ gem 'redcarpet'
 
 gem 'oauth'
 gem 'padrino'
+gem 'warden'
 
 ### padrino Gemfile ###
 

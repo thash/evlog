@@ -129,6 +129,8 @@ GEM
       rack
     vegas (0.1.11)
       rack (>= 1.0.0)
+    warden (1.2.1)
+      rack (>= 1.0)
     webrobots (0.0.13)
 
 PLATFORMS
@@ -148,3 +150,4 @@ DEPENDENCIES
   ripple!
   rspec
   sinatra-flash
+  warden
