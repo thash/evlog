@@ -29,25 +29,38 @@ class WebEvlog < Padrino::Application
     callback_url = "http://127.0.0.1:3000/oauth/callback"
     @request_token = consumer.get_request_token(:oauth_callback => callback_url)
 
-    robj = $riak.bucket("user").get_or_new("request_token")
-    robj.raw_data = Marshal.dump(@request_token)
-    robj.store
+    ea = EvernoteAccount.new(oauth_token: @request_token.token,
+                             tmp_request_token: Base64.encode64(Marshal.dump(@request_token)))
 
-    render :haml, "= link_to 'autholize@EverNote', @request_token.authorize_url"
+    if ea.save
+      render :haml, "= link_to 'autholize@EverNote', @request_token.authorize_url"
+    else
+      flash[:notice] = "failed to save EvernoteAccount"
+      redirect '/'
+    end
+
+    # robj = $riak.bucket("user").get_or_new("request_token")
+    # robj.raw_data = Marshal.dump(@request_token)
+    # robj.store
+
   end
 
   get '/oauth/callback' do
-    oauth_verifier   = params["oauth_verifier"] # これが大事
-    request_token    = Marshal.load($riak.bucket("user").get("request_token").raw_data)
+    # restore saved request_token_obj
+    ea = EvernoteAccount.find(params["oauth_token"])
+    request_token_obj = Marshal.load(Base64.decode64(ea.tmp_request_token))
+    ea.tmp_request_token = nil && ea.save!
 
-    access_token_obj = request_token.get_access_token(oauth_verifier: oauth_verifier)
-    @access_token    = access_token_obj.token # save token
+    access_token_obj = request_token_obj.get_access_token(oauth_verifier: params["oauth_verifier"])
 
+    if ea.encrypt_and_save_token(access_token_obj.token)
     render :haml, <<-__EOL__
-= "oauth_verifier: #{oauth_verifier}"
-= "request_token: #{request_token}"
-= "access_token: #{@access_token}"
+= "access_token: #{access_token_obj.token}
     __EOL__
+    else
+      flash[:notice] = "failed to update EvernoteAccount with access_token"
+      redirect '/'
+    end
   end
 
 
