@@ -8,14 +8,34 @@ class WebEvlog < Padrino::Application
 
   enable :sessions
 
+  # By default the strategy uses http://www.evernote.com site.
+  use OmniAuth::Builder do
+    provider :evernote, $secret.evernote.consumer_key, $secret.evernote.consumer_secret,
+                        client_options: { site: 'https://sandbox.evernote.com' }
+  end
+
   get '/' do
     #binding.pry
     render :haml, <<-__EOL__
 = flash[:notice] if flash[:notice] != nil
-= link_to 'login', '/users/login'
-= link_to 'signup', '/users/signup'
-= link_to 'oauth', '/request_token'
+= link_to 'OmniAuth-sign in with evernote', '/auth/evernote'
     __EOL__
+  end
+
+  # callback route for omniauth
+  get '/auth/:name/callback' do
+    auth = request.env["omniauth.auth"]
+    case auth.provider # params[:name] 縺ｧ繧ょ庄.
+    when "evernote"
+      # TODO: when existing account auth again
+      EvernoteAccount.create(
+        uid: auth.uid.to_s,
+        sandbox: EvernoteAccount.sandbox_callback?(auth),
+        encrypted_access_token: EvernoteAccount.encrypt_token(auth.credentials.token)
+      )
+    end
+    #binding.pry
+    redirect '/'
   end
 
   get '/request_token' do
@@ -39,10 +59,6 @@ class WebEvlog < Padrino::Application
       redirect '/'
     end
 
-    # robj = $riak.bucket("user").get_or_new("request_token")
-    # robj.raw_data = Marshal.dump(@request_token)
-    # robj.store
-
   end
 
   get '/oauth/callback' do
@@ -62,8 +78,6 @@ class WebEvlog < Padrino::Application
       redirect '/'
     end
   end
-
-
 
 
   ##
