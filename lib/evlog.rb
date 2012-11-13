@@ -10,6 +10,7 @@ $riak = Riak::Client.new
 # => will be removed cuz I'll use Ripple instead
 
 require File.expand_path("../ripple_support", __FILE__)
+require File.expand_path("../warden_omniauth", __FILE__)
 
 ### Essense of EDAMTest.rb {{{
 require "digest/md5"
