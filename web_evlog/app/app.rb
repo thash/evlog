@@ -1,3 +1,10 @@
+set_trace_func(lambda { |event, file, line, id, binding, klass|
+  if event =~ /call|return/ && id.to_s == "call" && klass != Proc
+    logger.info "#{klass}#call (#{event})"
+  end
+})
+
+
 # encoding: utf-8
 require File.expand_path("../../../lib/evlog", __FILE__)
 
