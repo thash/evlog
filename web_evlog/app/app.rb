@@ -1,11 +1,11 @@
+# encoding: utf-8
+
 set_trace_func(lambda { |event, file, line, id, binding, klass|
-  if event =~ /call|return/ && id.to_s == "call" && klass != Proc
-    logger.info "#{klass}#call (#{event})"
+  if event =~ /call|return/ && id.to_s == "call" && ![Proc,Method].include?(klass)
+    logger.info "#{klass}#call (#{event}, #{file.split('/')[-3..-1].join('/')})"
   end
 })
 
-
-# encoding: utf-8
 require File.expand_path("../../../lib/evlog", __FILE__)
 
 class WebEvlog < Padrino::Application
@@ -16,13 +16,20 @@ class WebEvlog < Padrino::Application
   enable :sessions
 
   # By default the strategy uses http://www.evernote.com site.
+  # wardenがあろうがなかろうがここは必須.
   use OmniAuth::Builder do
     provider :evernote, $secret.evernote.consumer_key, $secret.evernote.consumer_secret,
                         client_options: { site: 'https://sandbox.evernote.com' }
   end
 
+  WardenOmniAuth.setup_strategies("evernote")
+  use WardenOmniAuth do |config|
+    # このblockはリクエストのたびに呼ばれる(全体がそうなの? useのとこだから?)
+    config.redirect_after_callback = "/warden/callback"
+  end
+
   get '/' do
-    #binding.pry
+
     render :haml, <<-__EOL__
 = flash[:notice] if flash[:notice] != nil
 = link_to 'OmniAuth-sign in with evernote', '/auth/evernote'
@@ -31,8 +38,9 @@ class WebEvlog < Padrino::Application
 
   # callback route for omniauth
   get '/auth/:name/callback' do
+    binding.pry
     auth = request.env["omniauth.auth"]
-    case auth.provider # params[:name] 縺ｧ繧ょ庄.
+    case auth.provider # params[:name]
     when "evernote"
       # TODO: when existing account auth again
       EvernoteAccount.create(
@@ -41,7 +49,7 @@ class WebEvlog < Padrino::Application
         encrypted_access_token: EvernoteAccount.encrypt_token(auth.credentials.token)
       )
     end
-    #binding.pry
+    binding.pry
     redirect '/'
   end
 
