@@ -7,7 +7,7 @@ gem 'pry'
 gem 'mechanize'
 gem 'hashie'
 
-gem 'ripple', github: 'basho/ripple'
+gem 'ripple', :github => 'basho/ripple'
 # gem 'excon'     #=> faster http
 # gem 'yajl-ruby' #=> faster json
 
