@@ -22,11 +22,18 @@ class WebEvlog < Padrino::Application
                         client_options: { site: 'https://sandbox.evernote.com' }
   end
 
-  WardenOmniAuth.setup_strategies("evernote")
-  use WardenOmniAuth do |config|
-    # このblockはリクエストのたびに呼ばれる(全体がそうなの? useのとこだから?)
-    config.redirect_after_callback = "/warden/callback"
+  ## このブロックを設定しないとenv['warden']が入ってこない
+  use Warden::Manager do |manager|
+    manager.default_strategies :password, :basic
+    # manager.failure_app = WebEvlog
   end
+
+### WardenOmniAuthではなく単体で使う
+#  WardenOmniAuth.setup_strategies("evernote")
+#  use WardenOmniAuth do |config|
+#    # このblockはリクエストのたびに呼ばれる(全体がそうなの? useのとこだから?)
+#    config.redirect_after_callback = "/warden/callback"
+#  end
 
   get '/' do
 
@@ -77,6 +84,7 @@ class WebEvlog < Padrino::Application
   end
 
   get '/oauth/callback' do
+    binding.pry
     # restore saved request_token_obj
     ea = EvernoteAccount.find(params["oauth_token"])
     request_token_obj = Marshal.load(Base64.decode64(ea.tmp_request_token))

@@ -17,7 +17,9 @@ gem 'redcarpet'
 
 gem 'oauth'
 gem 'padrino'
-gem 'warden_omniauth'
+#gem 'warden_omniauth'
+gem 'warden'
+gem 'omniauth'
 gem 'omniauth-evernote'
 
 ### padrino Gemfile ###
