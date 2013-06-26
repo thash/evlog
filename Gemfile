@@ -15,12 +15,12 @@ gem 'resque'
 
 gem 'redcarpet'
 
-gem 'oauth'
-gem 'padrino'
-#gem 'warden_omniauth'
-gem 'warden'
-gem 'omniauth'
-gem 'omniauth-evernote'
+#gem 'oauth'
+#gem 'padrino'
+##gem 'warden_omniauth'
+#gem 'warden'
+#gem 'omniauth'
+#gem 'omniauth-evernote'
 
 ### padrino Gemfile ###
 
@@ -39,13 +39,5 @@ gem 'haml'
 gem 'rspec', :group => "test"
 gem 'rack-test', :require => "rack/test", :group => "test"
 
-# Padrino Stable Gem
-### gem 'padrino', '0.10.7'
-
-# Or Padrino Edge
-# gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
-
-# Or Individual Gems
-# %w(core gen helpers cache mailer admin).each do |g|
-#   gem 'padrino-' + g, '0.10.7'
-# end
+# Rails
+gem 'rails'
